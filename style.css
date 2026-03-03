@@ -89,6 +89,7 @@ header p {
     background-color: #f8f9fa;
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
