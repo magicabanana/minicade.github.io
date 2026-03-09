@@ -1,41 +1,32 @@
-// 사용자 입력(마우스 드래그)을 전담하여 관리
+// 사용자 입력(마우스/터치 드래그 연결)을 전담하여 관리
 function InputManager() {
-    // 드래그 상태 관리
     let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-
-    // 시각적 드래그 박스 DOM 요소
-    let dragBoxElement = null;
     let gridElement = null; // 이벤트의 기준이 될 게임 보드
     let selectionBoxElement = null; // UI에 보여줄 리스트 컨테이너
+    let selectedItemsList = []; // 드래그된 아이템들을 담을 임시 리스트
+    let svgOverlay = null; // 선을 그릴 SVG 요소
 
-    // 드래그된 아이템들을 담을 임시 리스트
-    let selectedItemsList = [];
-
-    // 초기화: 이벤트 리스너 등록
     function init() {
         gridElement = document.getElementById('grid');
         selectionBoxElement = document.getElementById('selection-items-box');
         if (!gridElement) return;
 
-        // 드래그 박스 UI 요소 생성 (DOM에는 드래그 시작 시 추가됨)
-        dragBoxElement = document.createElement('div');
-        dragBoxElement.id = 'drag-box';
+        // SVG 오버레이 준비
+        svgOverlay = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svgOverlay.id = "drag-line-svg";
+        gridElement.appendChild(svgOverlay);
 
-        // 그리드 내에서만 드래그 동작하도록 이벤트 할당 (화면 전체 캡처를 위해 document도 활용)
+        // 마우스 이벤트
         gridElement.addEventListener('mousedown', onMouseDown);
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
 
-        // 터치 디바이스 지원 (모바일 고려 시)
+        // 터치 이벤트
         gridElement.addEventListener('touchstart', (e) => {
-            // 터치는 touchmove에서 preventDefault를 호출하기 위해 active하게 처리
             onMouseDown(e.touches[0]);
         });
         document.addEventListener('touchmove', (e) => {
             if (isDragging) {
-                // 드래그 중일 때만 스크롤 방지
                 if (e.cancelable) e.preventDefault();
                 onMouseMove(e.touches[0]);
             }
@@ -43,80 +34,135 @@ function InputManager() {
         document.addEventListener('touchend', onMouseUp);
     }
 
+    // 마우스/터치 좌표 위치의 item-wrapper 반환
+    function getItemFromEvent(e) {
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        if (clientX === undefined || clientY === undefined) return null;
+
+        const elements = document.elementsFromPoint(clientX, clientY);
+        for (let el of elements) {
+            let wrapper = el.closest('.item-wrapper');
+            if (wrapper) return wrapper;
+        }
+        return null;
+    }
+
+    // 선 그리기 함수
+    function drawConnectionLines() {
+        if (!svgOverlay) return;
+
+        // 기존 선 모두 지우기
+        svgOverlay.innerHTML = '';
+
+        if (selectedItemsList.length < 2) return;
+
+        for (let i = 0; i < selectedItemsList.length - 1; i++) {
+            const itemA = selectedItemsList[i];
+            const itemB = selectedItemsList[i + 1];
+
+            // 부모(grid) 기준 중심점 계산
+            const startX = itemA.offsetLeft + itemA.offsetWidth / 2;
+            const startY = itemA.offsetTop + itemA.offsetHeight / 2;
+            const endX = itemB.offsetLeft + itemB.offsetWidth / 2;
+            const endY = itemB.offsetTop + itemB.offsetHeight / 2;
+
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", startX);
+            line.setAttribute("y1", startY);
+            line.setAttribute("x2", endX);
+            line.setAttribute("y2", endY);
+            line.classList.add("drag-line");
+
+            svgOverlay.appendChild(line);
+        }
+    }
+
+    function addItemToList(itemEl) {
+        itemEl.style.opacity = '0.7';
+        itemEl.style.transform = 'scale(0.9)';
+        selectedItemsList.push(itemEl);
+        renderSelectionList();
+        drawConnectionLines();
+    }
+
+    function handleItemDrag(itemEl) {
+        const index = selectedItemsList.indexOf(itemEl);
+
+        if (index !== -1) {
+            // 직전 아이템으로 되돌아간 경우, 마지막 선택 취소 (마치 선 그리기 뒤로 가기처럼)
+            if (index === selectedItemsList.length - 2) {
+                const removedItem = selectedItemsList.pop();
+                removedItem.style.opacity = '1';
+                removedItem.style.transform = 'scale(1)';
+                renderSelectionList();
+                drawConnectionLines();
+            }
+            return;
+        }
+
+        // 최대 5개 제한
+        if (selectedItemsList.length >= 5) return;
+
+        if (selectedItemsList.length > 0) {
+            const lastItem = selectedItemsList[selectedItemsList.length - 1];
+            const lastRow = parseInt(lastItem.dataset.row);
+            const lastCol = parseInt(lastItem.dataset.col);
+            const currRow = parseInt(itemEl.dataset.row);
+            const currCol = parseInt(itemEl.dataset.col);
+
+            const rowDiff = Math.abs(currRow - lastRow);
+            const colDiff = Math.abs(currCol - lastCol);
+
+            // 대각선 포함 인접 (행 차이 1 이하, 열 차이 1 이하이고 동일 칸이 아닐 때)
+            if (rowDiff <= 1 && colDiff <= 1 && !(rowDiff === 0 && colDiff === 0)) {
+                addItemToList(itemEl);
+            }
+        } else {
+            // 첫 번째
+            addItemToList(itemEl);
+        }
+    }
+
     function onMouseDown(e) {
         if (!gridElement) return;
 
-        // 게임 진행 중이 아니거나 일시정지 상태면 드래그 방지
         if (!window.isGameRunning || window.isPaused) return;
 
-        // 마우스 이벤트일 때만 preventDefault 호출 (터치는 위에서 별도로 처리하거나 필요 시 여기서 처리)
-        // touch 객체에는 preventDefault가 없으므로 체크 후 호출
         if (e && typeof e.preventDefault === 'function') {
             e.preventDefault();
         }
 
         isDragging = true;
-        selectedItemsList = []; // 새로운 드래그 시작 시 리스트 초기화
+        selectedItemsList = [];
+        if (svgOverlay) svgOverlay.innerHTML = ''; // 시작 시 초기화
 
-        // 요소의 화면 기준 위치 계산
-        const rect = gridElement.getBoundingClientRect();
-
-        // gridElement 내부 기준(상대 좌표)으로 시작점 저장
-        const currentScale = window.gameScale || 1;
-        startX = (e.clientX - rect.left) / currentScale;
-        startY = (e.clientY - rect.top) / currentScale;
-
-        // 그리드 영역 내부로 시작점 제한 (unscaled 기준)
-        startX = Math.max(0, Math.min(startX, gridElement.offsetWidth));
-        startY = Math.max(0, Math.min(startY, gridElement.offsetHeight));
-
-        // 시각적 박스 초기화 및 표시
-        updateDragBoxStyles(startX, startY, 0, 0);
-        gridElement.appendChild(dragBoxElement);
+        let itemEl = getItemFromEvent(e);
+        if (itemEl) {
+            handleItemDrag(itemEl);
+        }
     }
 
     function onMouseMove(e) {
         if (!isDragging) return;
 
-        const rect = gridElement.getBoundingClientRect();
-
-        // 현재 마우스 위치 (그리드 내부 상대 좌표)
-        const currentScale = window.gameScale || 1;
-        let currentX = (e.clientX - rect.left) / currentScale;
-        let currentY = (e.clientY - rect.top) / currentScale;
-
-        // 그리드 경계 내로 제한 (unscaled dimensions 사용)
-        currentX = Math.max(0, Math.min(currentX, gridElement.offsetWidth));
-        currentY = Math.max(0, Math.min(currentY, gridElement.offsetHeight));
-
-        // 박스의 좌상단 모서리(left, top)와 크기(width, height) 계산
-        const left = Math.min(startX, currentX);
-        const top = Math.min(startY, currentY);
-        const width = Math.abs(currentX - startX);
-        const height = Math.abs(currentY - startY);
-
-        updateDragBoxStyles(left, top, width, height);
-
-        // 실시간으로 박스와 충돌(포함)된 아이템들 검사
-        checkOverlappingItems(left, top, width, height);
+        let itemEl = getItemFromEvent(e);
+        if (itemEl) {
+            handleItemDrag(itemEl);
+        }
     }
 
     function onMouseUp(e) {
         if (!isDragging) return;
         isDragging = false;
 
-        // UI에서 드래그 박스 제거
-        if (dragBoxElement && dragBoxElement.parentNode) {
-            dragBoxElement.parentNode.removeChild(dragBoxElement);
-        }
+        if (svgOverlay) svgOverlay.innerHTML = ''; // 놓으면 선 즉시 삭제
 
         console.log("드래그 완료! 최종 선택된 아이템 개수:", selectedItemsList.length);
 
         check();
 
-        // --- 2. 드래그가 끝나면 임시 리스트 비우고, 시각적 피드백 중지 ---
-        // 생성된 시각적 피드백을 모두 원래대로 복구 
-        // (단, 10점 달성으로 이미 삭제되었다면 DOM에서 사라졌으므로 안전하게 무시됨)
+        // check() 에서 삭제된 아이템은 parentNode가 null이 되므로 남아있는 것만 스타일 복구
         selectedItemsList.forEach(itemEl => {
             if (itemEl.parentNode) {
                 itemEl.style.opacity = '1';
@@ -124,134 +170,31 @@ function InputManager() {
             }
         });
 
-        // 배열 초기화 및 우측 UI 리스트도 빈 상태로 다시 렌더링
+        // 리스트 초기화
         selectedItemsList = [];
         renderSelectionList();
     }
 
     function check() {
-        // --- 1. 최종 합계 점수 검사 ---
-        let totalScore = 0;
-        let isRemoved = false; // 삭제 여부 플래그
-
-        selectedItemsList.forEach(itemEl => {
-            const row = parseInt(itemEl.dataset.row);
-            const col = parseInt(itemEl.dataset.col);
-            const obj = objArr[row][col];
-            if (obj && typeof obj.score === 'number') {
-                totalScore += obj.score;
-            }
-        });
-
-        // 10점 달성 여부 체크
-        if (totalScore === 10) {
-            console.log("합계 10점 달성! 아이템을 삭제합니다.");
-            // gameManager에서 선언한 전역 변수 gridManager 의 삭제 함수 호출
+        // 기존 10점 룰 등 모두 제거
+        // 5개가 연결되었을 때 조건 없이 즉시 삭제
+        if (selectedItemsList.length === 5) {
+            console.log("5개 연결 완료! 아이템 삭제");
             if (typeof gridManager !== 'undefined') {
-                gridManager.addScore(100); // 예: 10점 달성 시 기본 100점 획득
+                gridManager.addScore(100);
                 gridManager.removeItems(selectedItemsList);
-                isRemoved = true;
-            }
-        }
-
-        // 리스트에 담긴 아이템 개수 체크 (10점 달성으로 이미 삭제되지 않은 경우에만)
-        if (!isRemoved && selectedItemsList.length >= 3) {
-            // 아이템의 속성 종류(type)가 모두 같은지 확인
-            let isSameType = true;
-
-            // 전역 objArr에서 첫 번째 아이템의 타입을 가져옴
-            const firstRow = parseInt(selectedItemsList[0].dataset.row);
-            const firstCol = parseInt(selectedItemsList[0].dataset.col);
-            const firstObj = objArr[firstRow][firstCol];
-            const firstType = firstObj ? firstObj.type : null;
-
-            for (let i = 1; i < selectedItemsList.length; i++) {
-                const r = parseInt(selectedItemsList[i].dataset.row);
-                const c = parseInt(selectedItemsList[i].dataset.col);
-                const obj = objArr[r][c];
-
-                if (!obj || obj.type !== firstType) {
-                    isSameType = false;
-                    break;
-                }
-            }
-
-            // 만약 리스트에 담긴 아이템의 종류가 모두 같다면(타입이 한 종류라면)
-            if (isSameType && firstType !== null) {
-                console.log("선택된 아이템의 종류가 모두 같습니다! 아이템을 삭제합니다.");
-                if (typeof gridManager !== 'undefined') {
-                    // 예: 같은 속성 제거 시 개수당 50점
-                    const earnedScore = selectedItemsList.length * 50;
-                    gridManager.addScore(earnedScore);
-                    gridManager.removeItems(selectedItemsList);
-                }
             }
         }
     }
 
-    // 드래그 박스 CSS 스타일 업데이트 헬퍼
-    function updateDragBoxStyles(left, top, width, height) {
-        dragBoxElement.style.left = `${left}px`;
-        dragBoxElement.style.top = `${top}px`;
-        dragBoxElement.style.width = `${width}px`;
-        dragBoxElement.style.height = `${height}px`;
-    }
-
-    // 드래그 박스 영역(AABB)과 아이템 영역들이 겹치는지 검사하여 리스트에 추가
-    function checkOverlappingItems(boxLeft, boxTop, boxWidth, boxHeight) {
-        // 박스의 우하단 좌표 계산
-        const boxRight = boxLeft + boxWidth;
-        const boxBottom = boxTop + boxHeight;
-
-        // 매번 초기화하고 완전히 포함된 것만 찾을지, 스치기만 해도 담을지에 따라 구현.
-        // 여기선 현재 박스 안에 닿은 것들을 매 프레임 재계산하여 리스트를 최신화함.
-        const currentIntersects = [];
-
-        // 렌더링된 모든 아이템 요소 순회
-        const itemElements = gridElement.querySelectorAll('.item-wrapper');
-
-        itemElements.forEach(itemEl => {
-            // offsetLeft/Top 은 gridElement 기준으로 계산된 상대 위치임
-            const itemLeft = itemEl.offsetLeft;
-            const itemTop = itemEl.offsetTop;
-            const itemRight = itemLeft + itemEl.offsetWidth;
-            const itemBottom = itemTop + itemEl.offsetHeight;
-
-            // AABB(Axis-Aligned Bounding Box) 충돌(겹침) 판별 로직
-            const isColliding = !(boxRight < itemLeft ||
-                boxLeft > itemRight ||
-                boxBottom < itemTop ||
-                boxTop > itemBottom);
-
-            if (isColliding) {
-                // 시각적 피드백 효과 (예: 약간 불투명하게)
-                itemEl.style.opacity = '0.7';
-                itemEl.style.transform = 'scale(0.9)';
-                currentIntersects.push(itemEl);
-            } else {
-                // 벗어난 요소는 원래대로 복구
-                itemEl.style.opacity = '1';
-                itemEl.style.transform = 'scale(1)';
-            }
-        });
-
-        selectedItemsList = currentIntersects;
-
-        // --- [요청사항 추가] 실시간 임시 리스트 UI 렌더링 ---
-        renderSelectionList();
-    }
-
-    // 선택된 아이템 배열을 기반으로 우측 UI 컨트롤 패널에 썸네일을 렌더링하는 함수
     function renderSelectionList() {
         if (!selectionBoxElement) return;
 
-        // 기존 렌더링 초기화
         selectionBoxElement.innerHTML = '';
 
         let totalScore = 0;
 
         selectedItemsList.forEach(itemEl => {
-            // 데이터셋에서 위치를 가져와 전역 objArr에서 점수 합산
             const row = parseInt(itemEl.dataset.row);
             const col = parseInt(itemEl.dataset.col);
             const obj = objArr[row][col];
@@ -259,20 +202,16 @@ function InputManager() {
                 totalScore += obj.score;
             }
 
-            // 원본 요소에서 이미지 src 추출
             const typeImgSrc = itemEl.querySelector('.item-type-img').src;
             const scoreImgSrc = itemEl.querySelector('.item-score-img').src;
 
-            // 썸네일 컨테이너 생성
             const thumbDiv = document.createElement('div');
             thumbDiv.classList.add('selection-thumb');
 
-            // 속성(배경) 이미지
             const typeImg = document.createElement('img');
             typeImg.src = typeImgSrc;
             typeImg.classList.add('thumb-type');
 
-            // 숫자(전경) 이미지
             const scoreImg = document.createElement('img');
             scoreImg.src = scoreImgSrc;
             scoreImg.classList.add('thumb-score');
@@ -283,27 +222,18 @@ function InputManager() {
             selectionBoxElement.appendChild(thumbDiv);
         });
 
-        // 점수 UI 업데이트
         const scoreSpan = document.getElementById('selection-score-total');
         if (scoreSpan) {
             scoreSpan.innerText = `(합계: ${totalScore})`;
         }
     }
 
-    // 초기화 실행
-    // HTML이 모두 로드된 후 실행하기 위해 설정(js 파일 로딩 시점에 주의)
     document.addEventListener('DOMContentLoaded', init);
 
     function forceCancelDrag() {
         if (!isDragging) return;
         isDragging = false;
 
-        // UI에서 드래그 박스 제거
-        if (dragBoxElement && dragBoxElement.parentNode) {
-            dragBoxElement.parentNode.removeChild(dragBoxElement);
-        }
-
-        // 아이템 스타일 복구
         selectedItemsList.forEach(itemEl => {
             if (itemEl.parentNode) {
                 itemEl.style.opacity = '1';
@@ -315,7 +245,6 @@ function InputManager() {
         renderSelectionList();
     }
 
-    // 외부로 노출할 인터페이스들 (필요하다면)
     return {
         getSelectedItems: () => selectedItemsList,
         forceCancelDrag
