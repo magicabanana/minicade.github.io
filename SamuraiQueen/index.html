@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samurai Queen - Mini Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <!-- 랜딩 페이지 -->
+        <section id="landing-page" class="scene active">
+            <h1 class="game-title">SAMURAI QUEEN</h1>
+            <button id="start-btn" class="main-btn">게임 시작</button>
+        </section>
+
+        <!-- 게임 씬 -->
+        <section id="game-scene" class="scene">
+            <div class="game-container">
+                <div id="game-board">
+                    <!-- 보드 레이어 (타일) -->
+                    <div id="tiles-layer" class="grid-layer"></div>
+                    <!-- 기물 레이어 (말) -->
+                    <div id="pieces-layer" class="grid-layer"></div>
+                    <!-- 게임판 (임시 정사각형 - 이제 필요 없음) -->
+                    <div class="placeholder-board"></div>
+                </div>
+
+                <div class="controls">
+                    <button id="restart-btn" class="ctrl-btn" title="재시작">
+                        <span class="icon">🔄</span>
+                    </button>
+                    <button id="pause-btn" class="ctrl-btn" title="일시정지">
+                        <span class="icon">⏸️</span>
+                    </button>
+                    <button id="mute-btn" class="ctrl-btn" title="음소거">
+                        <span class="icon">🔊</span>
+                    </button>
+                </div>
+
+                <div class="debug-controls">
+                    <button id="game-over-test-btn" class="debug-btn">임시 게임 오버</button>
+                    <button id="tile-delete-btn" class="debug-btn">타일 삭제</button>
+                    <button id="tile-add-btn" class="debug-btn">타일 추가</button>
+                </div>
+            </div>
+
+            <!-- 게임 오버 오버레이 -->
+            <div id="game-over-overlay" class="overlay">
+                <div class="overlay-content">
+                    <h2 class="overlay-title">GAME OVER</h2>
+                    <p class="score-label">최종 점수</p>
+                    <div id="final-score" class="score-value">0</div>
+                    <button id="retry-btn" class="main-btn">다시 시작</button>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="gameManager.js"></script>
+</body>
+
+</html>

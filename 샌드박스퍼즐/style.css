@@ -14,25 +14,28 @@ body {
     height: 100%;
 }
 
-/* 화면 중앙 버튼 */
-#centerBtn {
+/* 자판기 버튼 UI */
+#vendingBtn {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    bottom: 150px;
+    /* 자판기 물리 객체 상단 부근 */
+    left: 95px;
+    /* 자판기 X좌표 중앙 */
     transform: translate(-50%, -50%);
-    padding: 12px 24px;
-    font-size: 16px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
+    background-color: #f0f0f0;
+    border: 2px solid #333;
+    border-radius: 8px;
+    transition: 0.2s;
+    z-index: 10;
 }
 
-/* 화면 중앙 버튼 */
-#spawnBtn_10 {
-    color: black;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 12px 24px;
-    font-size: 16px;
-    cursor: pointer;
+#vendingBtn:not([disabled]) {
+    background-color: #ffd700;
+    border-color: #b8860b;
+    color: #333;
+    box-shadow: 0 0 10px #ffd700;
 }

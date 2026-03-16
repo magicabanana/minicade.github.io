@@ -1,0 +1,310 @@
+:root {
+    --bg-color: #cff285;
+    --primary-color: #2d3436;
+    --accent-color: #6c5ce7;
+    --btn-hover: #a29bfe;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --font-main: 'Outfit', sans-serif;
+    --piece-scale: 2;
+    /* 기본 2배 크기 */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: var(--font-main);
+    color: var(--primary-color);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.scene {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.scene.active {
+    opacity: 1;
+    pointer-events: all;
+    z-index: 10;
+    /* 활성화된 씬을 레이어 상단으로 배치 */
+}
+
+/* Landing Page Styles */
+.game-title {
+    font-size: 5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    letter-spacing: -2px;
+    text-shadow: 2px 2px 0px rgba(255, 255, 255, 1);
+    animation: title-float 3s ease-in-out infinite;
+}
+
+@keyframes title-float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.main-btn {
+    padding: 1rem 3rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.main-btn:hover {
+    transform: scale(1.05);
+    background-color: var(--accent-color);
+}
+
+/* Game Scene Styles */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+#game-board {
+    width: 70vmin;
+    height: 70vmin;
+    aspect-ratio: 1 / 1;
+    background-color: #2d3436;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    /* 보드 전체 크기가 정사각형이 되도록 테두리를 사방 10px로 통일 */
+    border: 10px solid var(--primary-color);
+    position: relative;
+    box-sizing: border-box;
+}
+
+.grid-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    /* 1fr 대신 12.5%를 사용하여 소수점 오차 최소화 및 정사각형 유지 */
+    grid-template-columns: repeat(8, 12.5%);
+    grid-template-rows: repeat(8, 12.5%);
+}
+
+#tiles-layer {
+    z-index: 50;
+    /* 보드 배경보다는 위, 기물 레이어보다는 아래 */
+    pointer-events: all;
+}
+
+#pieces-layer {
+    pointer-events: none !important;
+    z-index: 100;
+}
+
+#pieces-layer * {
+    pointer-events: none !important;
+}
+
+.tile {
+    /* 256x272 비율에 맞춰 높이를 확장 (272/256 = 1.0625) */
+    height: 106.25%;
+    background-size: 100% 100%;
+    background-position: top;
+    transform-origin: top;
+    position: relative;
+    cursor: pointer;
+    /* z-index는 JS에서 동적 부여 */
+}
+
+.tile:active {
+    filter: brightness(0.8);
+}
+
+.tile.highlight::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 25%;
+    height: 25%;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    z-index: 150;
+}
+
+.tile.white {
+    background-image: url('Assets/whitetile.png');
+}
+
+.tile.black {
+    background-image: url('Assets/blacktile.png');
+}
+
+.piece {
+    justify-self: center;
+    align-self: end;
+    /* 타일 위에 서 있는 느낌을 위해 하단 정렬 */
+
+    width: calc(100% * var(--piece-scale));
+    height: auto;
+    /* 이미지의 원래 비율에 맞게 높이 자동 조절 */
+
+    object-fit: contain;
+    z-index: 200;
+    pointer-events: none;
+    /* 타일 클릭을 방해하지 않도록 설정 */
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s;
+}
+
+.piece.selected {
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8)) brightness(1.2);
+    /* transform: translate(0, -5px) scale(1.1); */
+}
+
+.placeholder-board {
+    display: none;
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+}
+
+.ctrl-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    border: none;
+    background-color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ctrl-btn:hover {
+    transform: translateY(-5px);
+    background-color: var(--btn-hover);
+}
+
+.debug-controls {
+    margin-top: 1rem;
+}
+
+.debug-btn {
+    padding: 0.5rem 1.5rem;
+    background-color: #ff7675;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.debug-btn:hover {
+    opacity: 0.8;
+}
+
+/* Overlay Styles */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(45, 52, 70, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    z-index: 100;
+}
+
+.overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.overlay-content {
+    background-color: white;
+    padding: 3rem;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    transform: translateY(20px);
+    transition: transform 0.4s ease;
+}
+
+.overlay.active .overlay-content {
+    transform: translateY(0);
+}
+
+.overlay-title {
+    font-size: 3rem;
+    color: #ff7675;
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+.score-label {
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    color: #636e72;
+    margin-bottom: 0.5rem;
+}
+
+.score-value {
+    font-size: 4rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+}

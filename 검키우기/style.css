@@ -1,0 +1,82 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    /* 게임 화면 비율 유지를 위해 스크롤바 숨김 */
+    background-color: #1a1a1a;
+    /* 어두운 배경색 설정 */
+}
+
+#player-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #00ffcc;
+    /* 눈에 띄는 색상 */
+    border-radius: 50%;
+    /* 둥근 점으로 만들기 */
+    pointer-events: none;
+    /* 점이 마우스 클릭이나 이벤트를 방해하지 않도록 설정 */
+    transform: translate(-50%, -50%);
+    /* 점의 중앙이 마우스 포인터에 오도록 보정 */
+    box-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+    /* 약간의 네온 효과 */
+    z-index: 1000;
+}
+
+.orbit-point {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #ff33aa;
+    /* 핑크색 계열의 네온 */
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px #ff33aa, 0 0 15px #ff33aa;
+    z-index: 999;
+}
+
+.orbit-weapon {
+    position: absolute;
+    width: 40px;
+    /* 이미지 크기 조절 (원하는 대로 변경 가능) */
+    pointer-events: none;
+    transform-origin: center center;
+    /* 정중앙을 기준으로 회전 */
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    /* 다른 점들보다 위에 보이도록 */
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+    /* 약간의 윤곽 파티클 혹은 그림자 */
+}
+
+.weapon-trail {
+    position: absolute;
+    width: 40px;
+    pointer-events: none;
+    transform-origin: center center;
+    z-index: 1000;
+    /* 진짜 무기보다는 아래에 위치 */
+    filter: drop-shadow(0 0 5px rgba(0, 255, 204, 0.8));
+    /* 잔상 특유의 네온 색상 (시안색) */
+}
+
+/* --- 적 (Enemy) 스타일 --- */
+.enemy {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: #ff3333;
+    /* 빨간색 구체 */
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+    z-index: 900;
+    pointer-events: none;
+    transition: filter 0.1s;
+    /* 피격 깜빡임 전환용 */
+}

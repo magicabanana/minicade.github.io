@@ -4,55 +4,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>창 상태 모니터 - 선생님몰래춤추는학생 | Neal.fun 모작</title>
-    <meta name="description" content="브라우저 창의 위치, 가시성, 포커스 상태를 실시간으로 감지하고 기록하는 도구입니다. 창이 최소화되거나 다른 탭으로 이동하면 상태가 변합니다.">
+    <title>선생님 몰래 춤추기 (역발상 버전) | Catch the Sneaky Student</title>
+    <meta name="description" content="탭을 전환하는 순간 학생이 춤을 춥니다. 몰래 춤추는 학생을 급습하여 잡아내세요!">
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <div class="container">
-        <h1>Window State Monitor</h1>
-        <p class="subtitle">실시간 창 상태 감지 플랫폼</p>
-
-        <div class="grid">
-            <div class="card" id="pos-card">
-                <div class="card-icon">📍</div>
-                <h3>창 위치 (Coordinates)</h3>
-                <div class="value-group">
-                    <div class="value-item">
-                        <span class="label">X (Screen Left)</span>
-                        <span id="pos-x" class="value">0</span>
-                    </div>
-                    <div class="value-item">
-                        <span class="label">Y (Screen Top)</span>
-                        <span id="pos-y" class="value">0</span>
+    <div class="game-container">
+        <div class="header">
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">잡은 학생</span>
+                    <span id="caught-count" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">의심 지수</span>
+                    <div class="gauge-bg">
+                        <div id="suspicion-gauge" class="gauge-fill"></div>
                     </div>
                 </div>
             </div>
+            <h1>교실 감시 중...</h1>
+        </div>
 
-            <div class="card" id="vis-card">
-                <div class="card-icon">👁️</div>
-                <h3>가시성 (Visibility)</h3>
-                <div class="status-indicator" id="vis-status">Visible</div>
-                <p class="desc">최소화되거나 다른 탭으로 이동하면 상태가 바뀝니다.</p>
+        <div class="classroom">
+            <div class="blackboard">
+                <div class="chalk-text">오늘의 학습: 탭 전환 금지</div>
+            </div>
+            
+            <div class="desk-area">
+                <div class="student-desk">
+                    <div id="student" class="student sitting">
+                        <div class="student-head"></div>
+                        <div class="student-body"></div>
+                        <div class="student-arms"></div>
+                    </div>
+                    <div class="desk-top"></div>
+                </div>
             </div>
 
-            <div class="card" id="focus-card">
-                <div class="card-icon">🎯</div>
-                <h3>포커스 (Focus)</h3>
-                <div class="status-indicator" id="focus-status">Focused</div>
-                <p class="desc">다른 창을 클릭하면 상태가 바뀝니다.</p>
+            <div class="teacher-desk-overlay">
+                <div class="teacher-tools">
+                    <span>출석부</span>
+                    <span>사랑의 매</span>
+                </div>
             </div>
         </div>
 
-        <div class="log-container">
-            <h3>상태 로그</h3>
-            <div id="event-log" class="log-content">
-                <div class="log-entry">시스템 초기화 완료...</div>
+        <div id="youtube-player"></div> <!-- Hidden YouTube Player -->
+
+        <div class="status-panel">
+            <div id="status-text" class="status-text">학생이 공부하고 있습니다.</div>
+            <p class="hintText">💡 다른 탭으로 갔다가 재빨리 돌아와보세요!</p>
+            <button onclick="testAudio()" style="margin-top: 15px; background: rgba(255,255,255,0.1); color: #fff; font-size: 0.8rem; padding: 5px 15px;">🎵 브금 테스트</button>
+        </div>
+
+        <!-- Overlays -->
+        <div id="start-overlay" class="overlay">
+            <div class="overlay-content">
+                <h2 class="catch-title">감시 시작</h2>
+                <div class="catch-icon">👓</div>
+                <p style="margin-bottom: 20px; color: #bdc3c7;">학생들이 당신이 보지 않을 때 춤을 춥니다.<br>소리를 듣고 재빨리 돌아와 잡으세요!</p>
+                <button onclick="startGame()">감시 시작하기</button>
+            </div>
+        </div>
+
+        <div id="catch-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2 class="catch-title">딱 걸렸어!</h2>
+                <div class="catch-icon">🚨</div>
+                <button onclick="resetGame()">다음 학생 감시하기</button>
             </div>
         </div>
     </div>
+    
     <script src="script.js"></script>
 </body>
 
-</html>
+</html>

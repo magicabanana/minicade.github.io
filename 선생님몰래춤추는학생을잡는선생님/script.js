@@ -1,79 +1,142 @@
-const posX = document.getElementById('pos-x');
-const posY = document.getElementById('pos-y');
-const visStatus = document.getElementById('vis-status');
-const focusStatus = document.getElementById('focus-status');
-const eventLog = document.getElementById('event-log');
+const student = document.getElementById('student');
+const caughtCountEl = document.getElementById('caught-count');
+const suspicionGauge = document.getElementById('suspicion-gauge');
+const statusText = document.getElementById('status-text');
+const catchOverlay = document.getElementById('catch-overlay');
 
-function addLog(message) {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString();
-    const entry = document.createElement('div');
-    entry.className = 'log-entry event-change';
-    entry.textContent = `[${timeStr}] ${message}`;
-    eventLog.prepend(entry);
+let caughtCount = 0;
+let lastHiddenTime = 0;
+let isGameOver = false;
+let suspicionLevel = 0;
+let isGameStarted = false;
 
-    // Limit log size
-    if (eventLog.childNodes.length > 50) {
-        eventLog.removeChild(eventLog.lastChild);
-    }
+// YouTube API
+let player;
+const VIDEO_ID = 'R9j-C6VzV0w'; // Monkey Magic
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('youtube-player', {
+        height: '0',
+        width: '0',
+        videoId: VIDEO_ID,
+        playerVars: {
+            'autoplay': 0,
+            'controls': 0,
+            'disablekb': 1,
+            'enablejsapi': 1,
+            'origin': window.location.origin
+        },
+        events: {
+            'onReady': onPlayerReady
+        }
+    });
 }
 
-function updatePositions() {
-    // screenX/screenY or screenLeft/screenTop
-    const x = window.screenLeft ?? window.screenX;
-    const y = window.screenTop ?? window.screenY;
-
-    if (posX.textContent !== String(x) || posY.textContent !== String(y)) {
-        posX.textContent = x;
-        posY.textContent = y;
-        // Minor visual feedback when position changes
-        posX.parentElement.classList.add('updating');
-        posY.parentElement.classList.add('updating');
-        setTimeout(() => {
-            posX.parentElement.classList.remove('updating');
-            posY.parentElement.classList.remove('updating');
-        }, 300);
-    }
-
-    requestAnimationFrame(updatePositions);
+function onPlayerReady(event) {
+    console.log("Music ready");
+    event.target.setVolume(100);
 }
 
-function updateVisibility() {
-    const state = document.visibilityState;
-    visStatus.textContent = state === 'visible' ? 'Visible' : 'Hidden / Minimized';
-
-    if (state === 'visible') {
-        visStatus.className = 'status-indicator status-active';
-        addLog('페이지가 가시 상태가 되었습니다.');
+function testAudio() {
+    if (player && player.getPlayerState) {
+        const state = player.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+            player.pauseVideo();
+            statusText.textContent = "테스트 중지됨";
+        } else {
+            player.playVideo();
+            statusText.textContent = "몽키매직 재생 중... (소리가 들리나요?)";
+        }
     } else {
-        visStatus.className = 'status-indicator status-inactive';
-        addLog('페이지가 최소화되거나 가려졌습니다.');
+        alert("음악 플레이어가 아직 준비되지 않았습니다. 잠시만 기다려주세요.");
     }
 }
 
-function updateFocus(isFocused) {
-    focusStatus.textContent = isFocused ? 'Focused' : 'Blurred (Unfocused)';
+function startGame() {
+    isGameStarted = true;
+    document.getElementById('start-overlay').classList.add('hidden');
+    resetGame();
+}
 
-    if (isFocused) {
-        focusStatus.className = 'status-indicator status-active';
-        addLog('창이 활성화되었습니다.');
+// Load YouTube API
+const tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+const firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+// Game Config
+const DANCE_START_DELAY = 1000;
+const REACTION_WINDOW = 1200; // Increased slightly for fun with music
+
+function updateSuspicion() {
+    if (!isGameStarted || isGameOver) return;
+    
+    suspicionLevel = Math.min(100, suspicionLevel + 0.05);
+    suspicionGauge.style.width = `${suspicionLevel}%`;
+    
+    requestAnimationFrame(updateSuspicion);
+}
+
+let danceTimer = null;
+
+function handleVisibilityChange() {
+    if (!isGameStarted || isGameOver) return;
+
+    if (document.hidden) {
+        lastHiddenTime = Date.now();
+        
+        danceTimer = setTimeout(() => {
+            student.className = 'student dancing';
+            if (player && player.playVideo) player.playVideo();
+        }, DANCE_START_DELAY);
+        
     } else {
-        focusStatus.className = 'status-indicator status-inactive';
-        addLog('창이 포커스를 잃었습니다 (다른 창 선택됨).');
+        if (danceTimer) clearTimeout(danceTimer);
+        if (player && player.pauseVideo) player.pauseVideo();
+        
+        const timeAway = Date.now() - lastHiddenTime;
+
+        if (timeAway > DANCE_START_DELAY) {
+            const danceTime = timeAway - DANCE_START_DELAY;
+            
+            if (danceTime < REACTION_WINDOW) {
+                triggerCatch();
+            } else {
+                student.className = 'student sitting';
+                statusText.textContent = "학생이 시치미를 떼고 있습니다... (조금 더 빨리 돌아와보세요!)";
+                suspicionLevel = Math.min(100, suspicionLevel + 10);
+            }
+        } else {
+            student.className = 'student sitting';
+            statusText.textContent = "학생이 조용히 공부하고 있습니다.";
+        }
     }
 }
 
-// Initial state
-updateVisibility();
-updateFocus(document.hasFocus());
+function triggerCatch() {
+    isGameOver = true;
+    caughtCount++;
+    caughtCountEl.textContent = caughtCount;
+    
+    student.className = 'student caught';
+    statusText.textContent = "현행범 체포 완료!";
+    if (player && player.pauseVideo) player.pauseVideo();
+    
+    setTimeout(() => {
+        catchOverlay.classList.remove('hidden');
+    }, 500);
+}
+
+function resetGame() {
+    isGameOver = false;
+    suspicionLevel = 0;
+    student.className = 'student sitting';
+    statusText.textContent = "다시 감시를 시작합니다.";
+    catchOverlay.classList.add('hidden');
+    updateSuspicion();
+}
 
 // Event Listeners
-document.addEventListener('visibilitychange', updateVisibility);
+document.addEventListener('visibilitychange', handleVisibilityChange);
 
-window.addEventListener('focus', () => updateFocus(true));
-window.addEventListener('blur', () => updateFocus(false));
-
-// Start position monitoring loop
-requestAnimationFrame(updatePositions);
-
-addLog('실시간 모니터링 시작됨.');
+console.log("Game Initialized: Start to watch!");
