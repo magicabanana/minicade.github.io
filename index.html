@@ -4,93 +4,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOYBOX - games and stuff</title>
-    <meta name="description" content="아이디어 짬통.">
+
+    <!-- Primary SEO -->
+    <title>TOYBOX — 미니게임 모음 | Games and Stuff</title>
+    <meta name="description" content="사과게임, 5매치 포커, 이재용 물가 체감기, 오늘 뭐 먹지 등 다양한 미니게임과 인터랙티브 도구 모음. Neal.fun 스타일의 작고 재미있는 웹 프로젝트들.">
+    <meta name="keywords" content="미니게임, 웹게임, 사과게임, 퍼즐게임, 물가계산기, 랜덤픽커, 인터랙티브, toybox">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Park">
+    <link rel="canonical" href="https://magicabanana.github.io/toybox/">
+
+    <!-- Open Graph (소셜 미디어 공유) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://magicabanana.github.io/toybox/">
+    <meta property="og:title" content="TOYBOX — 미니게임 모음">
+    <meta property="og:description" content="사과게임, 5매치 포커, 이재용 물가 체감기 등 작고 재미있는 웹 프로젝트 모음.">
+    <meta property="og:image" content="https://magicabanana.github.io/toybox/title.png">
+    <meta property="og:locale" content="ko_KR">
+    <meta property="og:site_name" content="TOYBOX">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TOYBOX — 미니게임 모음">
+    <meta name="twitter:description" content="사과게임, 5매치 포커, 이재용 물가 체감기 등 작고 재미있는 웹 프로젝트 모음.">
+    <meta name="twitter:image" content="https://magicabanana.github.io/toybox/title.png">
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6673239680652802" crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="style.css">
+
+    <!-- JSON-LD 구조화 데이터 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "TOYBOX",
+      "url": "https://magicabanana.github.io/toybox/",
+      "description": "작고 재미있는 미니게임과 인터랙티브 웹 프로젝트 모음",
+      "author": {
+        "@type": "Person",
+        "name": "Park"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://magicabanana.github.io/toybox/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "TOYBOX 미니게임 목록",
+      "url": "https://magicabanana.github.io/toybox/",
+      "numberOfItems": 10,
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "사과게임", "url": "https://magicabanana.github.io/toybox/사과게임/" },
+        { "@type": "ListItem", "position": 2, "name": "5매치 포커족보", "url": "https://magicabanana.github.io/toybox/5매치_포커족보/" },
+        { "@type": "ListItem", "position": 3, "name": "이재용 물가 체감기", "url": "https://magicabanana.github.io/toybox/이재용계산기/" },
+        { "@type": "ListItem", "position": 4, "name": "일상 퀘스트 & 타이머", "url": "https://magicabanana.github.io/toybox/일상퀘스트/" },
+        { "@type": "ListItem", "position": 5, "name": "창 상태 모니터", "url": "https://magicabanana.github.io/toybox/선생님몰래춤추는학생을잡는선생님/" },
+        { "@type": "ListItem", "position": 6, "name": "기어나와요 짐승의 숲", "url": "https://magicabanana.github.io/toybox/기어나와요짐승의숲/" },
+        { "@type": "ListItem", "position": 7, "name": "오늘 뭐 먹지?", "url": "https://magicabanana.github.io/toybox/오늘뭐먹지/" },
+        { "@type": "ListItem", "position": 8, "name": "사과 쓰리매치 서바이벌", "url": "https://magicabanana.github.io/toybox/사과쓰리매치서바이벌/" },
+        { "@type": "ListItem", "position": 9, "name": "Emptyland", "url": "https://magicabanana.github.io/toybox/Emptyland/client/" },
+        { "@type": "ListItem", "position": 10, "name": "담비쿠키", "url": "https://magicabanana.github.io/toybox/담비쿠키/" }
+      ]
+    }
+    </script>
 </head>
 
 <body>
     <header>
-        <!-- <h1>TOYBOX</h1> -->
-        <img src="./title.png" class="header-logo">
+        <!-- 스크린리더 전용 h1 (SEO용 시맨틱 구조) -->
+        <h1 class="sr-only">TOYBOX — 미니게임 모음</h1>
+        <img src="./title.png" class="header-logo" alt="TOYBOX 로고" width="600" height="120">
         <p>games and stuff by Neal Clone</p>
     </header>
 
     <main class="container">
         <div class="grid">
+
             <!-- 사과게임 -->
-            <a href="사과게임/index.html" class="card">
-                <div class="card-image" data-title="사과게임"></div>
+            <a href="사과게임/index.html" class="card" aria-label="사과게임 플레이하기">
+                <div class="card-image">
+                    <div class="card-text">
+                        <h2 class="card-title">사과게임</h2>
+                        <p class="card-desc">합이 10이 되는 사과를 골라 없애세요</p>
+                    </div>
+                </div>
             </a>
 
-            <!-- 5매치포카 -->
-            <a href="5매치_포커족보/index.html" class="card">
-                <div class="card-image" data-title="5매치퍼즐"></div>
+            <!-- 5매치포커 -->
+            <a href="5매치_포커족보/index.html" class="card" aria-label="5매치 퍼즐 플레이하기">
+                <div class="card-image">
+                    <div class="card-text">
+                        <h2 class="card-title">5매치 퍼즐</h2>
+                        <p class="card-desc">포커 족보를 맞추는 매칭 퍼즐</p>
+                    </div>
+                </div>
             </a>
 
             <!-- 이재용계산기 -->
-            <a href="이재용계산기/index.html" class="card">
-                <div class="card-image" style="background-image: url('Banners/삼성회장님.jpg');" width="120%" height="120%"
-                    data-title="이재용 물가 체감기">
+            <a href="이재용계산기/index.html" class="card" aria-label="이재용 물가 체감기 플레이하기">
+                <div class="card-image" style="background-image: url('Banners/삼성회장님.jpg');">
+                    <div class="card-text">
+                        <h2 class="card-title">이재용 물가 체감기</h2>
+                        <p class="card-desc">이재용 재산 기준으로 환산하면?</p>
+                    </div>
                 </div>
             </a>
 
             <!-- 일상퀘스트 -->
-            <a href="일상퀘스트/index.html" class="card">
-                <div class="card-image" data-title="일상 퀘스트 & 타이머"></div>
-            </a>
-
-            <!-- 선생님몰래춤추는학생을잡는선생님 -->
-            <a href="선생님몰래춤추는학생을잡는선생님/index.html" class="card">
-                <div class="card-image" data-title="창 상태 모니터"></div>
-            </a>
-
-            <!-- 기어나와요짐승의숲 -->
-            <a href="기어나와요짐승의숲/index.html" class="card">
-                <div class="card-image" data-title="기어나와요짐승의숲"></div>
-            </a>
-
-            <!-- 오늘뭐먹지 -->
-            <a href="오늘뭐먹지/index.html" class="card">
-                <div class="card-image" data-title="오늘뭐먹지"></div>
-            </a>
-
-            <!-- 사과쓰리매치서바이벌 -->
-            <a href="사과쓰리매치서바이벌/index.html" class="card">
-                <div class="card-image" style="background-image: url('Banners/banner_3applematch.png');"
-                    data-title="사과쓰리매치">
+            <a href="일상퀘스트/index.html" class="card" aria-label="일상 퀘스트 & 타이머 플레이하기">
+                <div class="card-image">
+                    <div class="card-text">
+                        <h2 class="card-title">일상 퀘스트 & 타이머</h2>
+                        <p class="card-desc">오늘 할 일을 RPG 퀘스트처럼</p>
+                    </div>
                 </div>
             </a>
 
-            <!-- emptyland -->
-            <a href="Emptyland/client/index.html" class="card">
-                <div class="card-image" data-title="emptyland"></div>
+            <!-- 선생님몰래춤추는학생을잡는선생님 -->
+            <a href="선생님몰래춤추는학생을잡는선생님/index.html" class="card" aria-label="창 상태 모니터 열기">
+                <div class="card-image">
+                    <div class="card-text">
+                        <h2 class="card-title">창 상태 모니터</h2>
+                        <p class="card-desc">브라우저 창 상태를 실시간 감지</p>
+                    </div>
+                </div>
             </a>
 
-            <!-- Placeholder for future projects -->
-            <div class="card" style="opacity: 0.5; cursor: default; pointer-events: none;">
-                <div class="card-image" data-title="Coming Soon"></div>
-            </div>
+            <!-- 기어나와요짐승의숲 -->
+            <a href="기어나와요짐승의숲/index.html" class="card" aria-label="기어나와요 짐승의 숲 플레이하기">
+                <div class="card-image">
+                    <div class="card-text">
+                        <h2 class="card-title">기어나와요 짐승의 숲</h2>
+                        <p class="card-desc">숲에서 기어나오는 짐승들을 물리쳐라</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 오늘뭐먹지 -->
+            <a href="오늘뭐먹지/index.html" class="card" aria-label="오늘 뭐 먹지 열기">
+                <div class="card-image">
+                    <div class="card-text">
+                        <h2 class="card-title">오늘 뭐 먹지?</h2>
+                        <p class="card-desc">메뉴 결정 장애를 위한 랜덤 픽커</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 사과쓰리매치서바이벌 -->
+            <a href="사과쓰리매치서바이벌/index.html" class="card" aria-label="사과 쓰리매치 서바이벌 플레이하기">
+                <div class="card-image" style="background-image: url('Banners/banner_3applematch.png');">
+                    <div class="card-text">
+                        <h2 class="card-title">사과 쓰리매치</h2>
+                        <p class="card-desc">사과를 3개씩 매칭하는 서바이벌</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Emptyland -->
+            <a href="Emptyland/client/index.html" class="card" aria-label="Emptyland 플레이하기">
+                <div class="card-image">
+                    <div class="card-text">
+                        <h2 class="card-title">Emptyland</h2>
+                        <p class="card-desc">빈 땅을 함께 개척하는 멀티게임</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 담비쿠키 -->
+            <a href="담비쿠키/index.html" class="card" aria-label="담비쿠키 플레이하기">
+                <div class="card-image">
+                    <div class="card-text">
+                        <h2 class="card-title">담비쿠키</h2>
+                        <p class="card-desc">귀여운 담비쿠키를 만나보세요</p>
+                    </div>
+                </div>
+            </a>
+
         </div>
     </main>
 
-    <footer>
+    <footer role="contentinfo">
         <div class="footer-intro">
             Hi! I'm Park. This is where I make stuff on the web. Obligatory links:
         </div>
-        <div class="footer-links">
+        <nav class="footer-links" aria-label="외부 링크">
             <a href="#" class="footer-btn">
-                <span>✉️</span> Newsletter
+                <span aria-hidden="true">✉️</span> Newsletter
             </a>
             <a href="#" class="footer-btn">
-                <span>🐦</span> Twitter
+                <span aria-hidden="true">🐦</span> Twitter
             </a>
             <a href="#" class="footer-btn">
-                <span>☕</span> Buy me a coffee
+                <span aria-hidden="true">☕</span> Buy me a coffee
             </a>
-        </div>
+        </nav>
         <div class="footer-contact">
-            Contact - <a href="mailto:hi@neal.fun">hi@toybox.fun</a>
+            Contact — <a href="mailto:hi@toybox.fun">hi@toybox.fun</a>
         </div>
         <a href="#" class="footer-policy">Privacy policy</a>
     </footer>
@@ -99,5 +214,3 @@
 </body>
 
 </html>
-
-<!-- 배포하면서 해야 할 거: 구글 서치 콘솔에 등록, sitemap.xml 생성 및 등록, 나름 뭐 인스타에 좀 홍보좀 하기, 애드센스 달아보기-->
