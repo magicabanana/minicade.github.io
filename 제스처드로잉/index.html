@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제스처 인식 놀이터 (Gesture Playground)</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- MediaPipe Hands & Camera Utils -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖐 제스처 놀이터 템플릿</h1>
+            <p>카메라 기반 핸드 트래킹 보일러플레이트입니다. 원하는 기능(마법, 가위바위보 등)을 자유롭게 추가해보세요.</p>
+            <p style="font-size: 0.8rem; color:#888;">(※ 카메라 허용 권한이 필요합니다)</p>
+        </header>
+
+        <div class="video-container">
+            <video class="input_video" autoplay playsinline></video>
+            <canvas class="output_canvas" width="640" height="480"></canvas>
+            <div id="loading" class="loading">카메라 및 AI 모델을 불러오는 중...</div>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="../index.html" class="home-btn" style="color:#fff; text-decoration:none; padding:10px 20px; background:#333; border-radius:8px;">TOYBOX 홈으로</a>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
